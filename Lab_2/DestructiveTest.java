@@ -19,6 +19,7 @@ public class DestructiveTest {
         int tries = 0;
         //start at the bottom of the ladder, and as long as we haven't passed
         //the safe rung
+        boolean ladder_safe = false;
         for (rung = 0; rung <= safe_rung;) {
             //move over an interval
             rung += step;
@@ -27,7 +28,14 @@ public class DestructiveTest {
             //if we go over the height of the ladder
             if (rung > height) {
                 //then we say it broke at the top of the ladder
-                output[3] = height;
+                if (safe_rung == height) {
+                    ladder_safe = true;
+                    output[2] = height;
+                    output[3] = -1;
+                }
+                else {
+                    output[3] = height;
+                }
                 //we then break immediately since we've passed the safe rung
                 //and the height of the ladder
                 break;
@@ -36,6 +44,7 @@ public class DestructiveTest {
                 output[3] = rung;
             }
         }
+        if (!ladder_safe) {
         //move back one interval so that we test on a rung that is lower than
         //the safe rung
         rung -= step;
@@ -55,6 +64,7 @@ public class DestructiveTest {
         if (rung != output[3])
             //but if we did, then we keep track of it
             output[4] = rung;
+        }
         //assign the amount of tries to the output's last element
         output[5] = tries;
         //return the array of integers
