@@ -21,27 +21,21 @@ public class BipartiteCheck {
     private static boolean bfs(ArrayList<Integer> [] adjList, int v) {
         LinkedList<Integer> queue = new LinkedList<Integer>();
         queue.add(v);
-        boolean colorRed = false;
         graphColor[v] = RED;
         while (queue.size() != 0) {
             int root = queue.poll();
             for (int i = 0; i < adjList[root].size(); i++) {
                 int neighbor = adjList[root].get(i);
                 if (graphColor[neighbor] == -1) {
-                    if (colorRed) {
-                        graphColor[neighbor] = RED;
-                    } else {
+                    if (graphColor[root] == RED) {
                         graphColor[neighbor] = BLACK;
+                    } else {
+                        graphColor[neighbor] = RED;
                     }
                     queue.add(neighbor);
                 } else if (graphColor[root] == graphColor[neighbor]) {
                     return false;
                 }
-            }
-            if (colorRed) {
-                colorRed = false;
-            } else {
-                colorRed = true;
             }
         }
         return true;
