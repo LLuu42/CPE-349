@@ -40,7 +40,15 @@ public class MyHeap {
   }
   //returns the internal array
   public int [] heapContents() {
-    return heap;
+    //creates array to be returned
+    int [] arr = new int [size];
+    //starts at index 1 because that is when the heap starts
+    for (int i = 1; i <= size; i++) {
+        //but the array we turn should start at index 0, so we shift by one
+        arr[i - 1] = heap[i];
+    }
+    //return it afterwards
+    return arr;
   }
   //inserts an element into the heap
   public boolean insert(int element) {
