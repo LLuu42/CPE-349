@@ -24,7 +24,7 @@ class GraphStart
 		for(int i=0;i<=MAXV;i++)  {
 			degree[i] = 0;
          edges[i] = new ArrayList<Integer>();
-      }   
+      }
 	}
 		
    void readfile_graph(String filename) throws FileNotFoundException     {
@@ -38,22 +38,22 @@ class GraphStart
 			x=sc.nextInt();
 			y=sc.nextInt();
 			insert_edge(x,y,directed);
-		}  
+		}
 		                           // order edges (book convention) to ease debugging
 		for(int i=1;i<=nvertices;i++)	{
 			Collections.sort(edges[i]);
-		}  
+		}
 	}
-  
+
 	void insert_edge(int x, int y, boolean directed)	{
-		                         // not worrying about capacity		         
+		                         // not worrying about capacity
       edges[x].add(y);
       degree[x]++;
-      
+
 		if (!directed)  {       // adding "mirror" edge since not directed
          edges[y].add(x);
          degree[y]++;
-			nedges++;         
+			nedges++;
       }
 	}
 
@@ -64,12 +64,12 @@ class GraphStart
 		degree[x]--;
 	}
 
-	
+
 	void print_graph()	{
-      if (directed) 
-         System.out.printf("Directed Graph\n"); 
-      else 
-         System.out.printf("Undirected Graph\n"); 
+      if (directed)
+         System.out.printf("Directed Graph\n");
+      else
+         System.out.printf("Undirected Graph\n");
 		for(int i=1;i<=nvertices;i++)   {
 			System.out.printf("%d: ",i);
 			for(int j=0;j<=degree[i]-1;j++)
