@@ -76,7 +76,7 @@ public class RodCutter {
         int [] prices = new int[length];
         String [] data = fileScanner.nextLine().split(" ");
         for (int j = 0; j < length; j++) {
-          prices[i] = Integer.parseInt(data[i]);
+          prices[j] = Integer.parseInt(data[j]);
         }
         printCuts(cutRod(prices, length));
       }
