@@ -1,5 +1,6 @@
 import java.util.*;
 import java.lang.*;
+import java.io.File;
 
 public class WgtIntScheduler {
   public static int [] getOptSet(int [] stime, int [] ftime,
@@ -13,19 +14,31 @@ public class WgtIntScheduler {
     }
     //sort the intervals in order of increasing finish time
     Arrays.sort(intervals, new IntervalComparator());
+    //calculate the closest compatible job for job i
+    int [] closestJobs = new int[stime.length];
+    for (int i = 0; i < stime.length ; i++) {
+      closestJobs[i] = 0;
+      for (int j = i - 1; j >= 0; j--) {
+        if (intervals[i].stime >= intervals[j].ftime) {
+          closestJobs[i] = j + 1;
+          j = 0;
+        }
+      }
+    }
     //represent the total weight at that time
-    int [] times = new int[stime.length];
+    int [] times = new int[stime.length + 1];
     //starting after the first interval, find the optimum subset of intervals
     for (int i = 1; i < stime.length; i++) {
       //calculate the compatible interval prior to this interval
-      int closestJob = findClosestJob(i, intervals);
       //this step is used to see if we use the interval or not
-      times[i] = Math.max(intervals[i].weight + times[closestJob], times[i-1]);
+      times[i] = Math.max(intervals[i-1].weight
+                 + times[closestJobs[i-1]], times[i-1]);
     }
     //get the intervals we used in our optimal solution
     //used stringbuilder because of its ability to reverse strings
-    String [] steps = new StringBuilder(traceback(times.length - 1,
-                      intervals, times)).reverse().toString().split(" ");
+    String [] steps = new StringBuilder(traceback(stime.length,
+                      intervals, times, closestJobs)).
+                      reverse().toString().split(" ");
     //represents the intervals in our optimal solution, size is -1 because of
     //the string that traceback returns
     int [] schedule = new int [steps.length - 1];
@@ -34,6 +47,7 @@ public class WgtIntScheduler {
       schedule[i] = Integer.parseInt(steps[i + 1]);
     }
     //return an array containing the job numbers
+    Arrays.sort(schedule);
     return schedule;
   }
 
@@ -41,37 +55,23 @@ public class WgtIntScheduler {
   //we are using a string because this method is recursive, and makes acquiring
   //data from the previous recursive call much easier
   private static String traceback(int jobStep, Interval [] intervals,
-                                  int [] times) {
-    //calculates the closest compatible interval
-    int closestJob = findClosestJob(jobStep, intervals);
-    //if we are the start of the interval, do not append to string
-    if (jobStep == 0) {
-      return "";
-    //if we did take that interval
-    } else if ((intervals[jobStep].weight + times[closestJob]) >
-                times[jobStep - 1]) {
-      //get the job number it had, and return it up the callchain
-      return intervals[jobStep].job + " " +
-             traceback(closestJob, intervals, times);
-    //otherwise use the previous interval
-    } else {
-      return "" + traceback(jobStep - 1, intervals, times);
-    }
-  }
-
-  //method to find the closest compatible interval
-  private static int findClosestJob(int currentJob, Interval [] intervals) {
-    //assume it starts at the 0th job
-    int largestJob = 0;
-    //go through all jobs until our current job
-    for (int i = 0; i < currentJob; i++) {
-      //checks to see if it is compatible
-      if (intervals[i].ftime <= intervals[currentJob].stime) {
-        largestJob = i;
+                                  int [] times, int [] closestJobs) {
+    //to make sure we don't go below index 0
+    if (jobStep != 0) {
+      //calculate the closest job
+      int closestJob = closestJobs[jobStep - 1];
+      //if we did use this job, traceback
+      if ((intervals[jobStep - 1].weight + times[closestJob])
+                                      >= times[jobStep - 1]) {
+        return intervals[jobStep - 1].job + " " +
+               traceback(closestJob, intervals, times, closestJobs);
+      } else {
+        //otherwise go to the previous job and see if we did
+        return "" + traceback(jobStep - 1, intervals, times, closestJobs);
       }
     }
-    //returns the interval number
-    return largestJob;
+    //base case
+    return "";
   }
 
   //private class representing an interval
@@ -114,4 +114,5 @@ public class WgtIntScheduler {
  	    return true;
     }
   }
+
 }
