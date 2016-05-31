@@ -61,10 +61,8 @@ public class Knapsack {
     Arrays.sort(items, new ItemComparator());
     //keeps track of how much space we have left
     int curCapacity = capacity;
-    //keeps track of the weight and value
     int weight = 0;
     int max = 0;
-    //string to
     ArrayList<Integer> itemNumbers = new ArrayList<Integer>();
     //goes through each item
     for (Item item : items) {
@@ -81,9 +79,7 @@ public class Knapsack {
         break;
       }
     }
-    //sort the arraylist
     Collections.sort(itemNumbers);
-    //outputs what we found
     System.out.println("Greedy solution (not necessarily optimal): " +
                         "Value " + max + ", Weight " + weight);
     for (Integer item : itemNumbers) {
@@ -97,14 +93,10 @@ public class Knapsack {
                             int [] weights) {
     //creates a table to keep track of values
     int [][] table = new int [n + 1][capacity + 1];
-    //starting at item 1, and going through each of the weights
     for (int i = 1; i <= n; i++) {
       for (int j = 0; j <= capacity; j++) {
-        //if we can fit an item in
         if (weights[i - 1] <= j) {
           //check to see if we should put it in the bag
-          //puts in the bag if the configuration of that weight is better
-          //than not putting it in
           table[i][j] = Math.max(table[i - 1][j],
                         table[i - 1][j - weights[i - 1]] + values[i - 1]);
         } else {
@@ -117,33 +109,25 @@ public class Knapsack {
     traceback(capacity, n, values, weights, table);
   }
 
-  //traceback method for the dynamic programming solution
   public static void traceback(int capacity, int n, int [] values,
                               int [] weights, int [] [] table) {
-    //start at last item with a full bag
     int i = n;
     int j = capacity;
-    //keep track of which items we add, as well as the values and weights
-    int value = 0;
-    int weight = 0;
+    int value, weight = 0;
     ArrayList<Integer> itemsTaken = new ArrayList<Integer>();
     //while there are still items to take and we aren't empty
     while (i > 0 && j >= 0) {
       //if we did take an item
       if (table[i][j] != table[i-1][j]) {
-        //keep track of that item
         itemsTaken.add(i--);
-        //add the value and weight of that
         value += values[i];
         weight += weights[i];
-        //take the item out of the bag
         j -= weights[i];
       } else {
         //otherwise, go back an item
         i--;
       }
     }
-    //prints out the results
     System.out.println("Dynamic Programming solution: Value "
                       + value + ", Weight " + weight);
     Collections.sort(itemsTaken);
@@ -238,7 +222,7 @@ public class Knapsack {
       items.addAll(other.items);
     }
 
-    void findUpperBound(int capacity, int n, Item [] items, int [] values, int [] weights) {
+    void findUpperBound(int capacity, int n, Item [] items) {
       //get the item we are on
       int item = level;
       //keep track of current weight
@@ -257,6 +241,9 @@ public class Knapsack {
         item++;
       }
       //add the partial item to the upper bound
+      if (item == n) {
+        item--;
+      }
       upperbound += (capacity - tempWeight) * (1.0 * items[item].value )
                     / items[item].weight;
     }
@@ -285,7 +272,7 @@ public class Knapsack {
     Node best = new Node();
     //create the starting point
     Node root = new Node();
-    root.findUpperBound(capacity, n, items, values, weights);
+    root.findUpperBound(capacity, n, items);
     //creates the priority queue
     PriorityQueue<Node> queue = new PriorityQueue<Node>();
     queue.offer(root);
@@ -318,7 +305,7 @@ public class Knapsack {
           //if we have more items left
           if (left.level < n) {
             //calculate the upper bound
-            left.findUpperBound(capacity, n, items, values, weights);
+            left.findUpperBound(capacity, n, items);
           }
           //if its the best we have so far, then update it
           if (left.value > best.value) {
@@ -330,13 +317,12 @@ public class Knapsack {
           }
         }
         //but if we didn't take the item
-        Node right = new Node(node);//System.out.println(filescanner.nextLine().split(" ")[0]);
-      //int itemCount = Integer.parseInt(filescanner.nextLine().split(" ")[0]);
+        Node right = new Node(node);
         //go down a level as well
         right.level++;
         //find the upper bound, and go down the tree
         if (right.level < n) {
-          right.findUpperBound(capacity, n, items, values, weights);
+          right.findUpperBound(capacity, n, items);
           if (right.upperbound > best.value) {
             queue.offer(right);
           }
