@@ -239,31 +239,26 @@ public class Knapsack {
     }
 
     void findUpperBound(int capacity, int n, Item [] items, int [] values, int [] weights) {
-      /*
-      upperbound = (capacity - weight) * ((double) items[level].value
-                  / items[level].weight) + this.value;*/
-      /*
+      //get the item we are on
       int item = level;
-      int itemNumber = items[item].number - 1;
+      //keep track of current weight
       int tempWeight = weight;
+      //give the node a starting upper bound
       upperbound = value;
-      while (item < n && tempWeight + weights[itemNumber] <= capacity) {
-        itemNumber = items[item].number - 1;
-        tempWeight += weights[itemNumber];
-        upperbound += values[itemNumber];
-        item++;
-      }
-      upperbound += (capacity - tempWeight) * (1.0 * values[itemNumber]) / weights[itemNumber];
-      */
-      int item = level;
-      int tempWeight = weight;
-      upperbound = value;
+      //while there are still items to add and if there is space
+      //this gives a much more realistic, efficient, and tighter upper bound
+      //than compared to the textbook
       while (item < n && tempWeight + items[item].weight <= capacity) {
-        tempWeight += weights[item];
-        upperbound += values[item];
+        //add the item
+        tempWeight += items[item].weight;
+        //increase the upperbound
+        upperbound += items[item].value;
+        //move onto the next item
         item++;
       }
-      upperbound += (capacity - tempWeight) * (1.0 * items[item].value) / items[item].weight;
+      //add the partial item to the upper bound
+      upperbound += (capacity - tempWeight) * (1.0 * items[item].value )
+                    / items[item].weight;
     }
 
     //method to compare two nodes; only included to fulfill the Comparable
@@ -279,7 +274,7 @@ public class Knapsack {
     long start = System.currentTimeMillis();
     //keeps track of whether or not the timer went off
     boolean finished = false;
-    //creates an array of items to make organizing the data easier
+    //creates an array of items to make orgnizing the data easier
     Item [] items = new Item [n];
     for (int i = 0; i < n; i++) {
       items[i] = new Item(values[i], weights[i], i + 1);
@@ -335,7 +330,8 @@ public class Knapsack {
           }
         }
         //but if we didn't take the item
-        Node right = new Node(node);
+        Node right = new Node(node);//System.out.println(filescanner.nextLine().split(" ")[0]);
+      //int itemCount = Integer.parseInt(filescanner.nextLine().split(" ")[0]);
         //go down a level as well
         right.level++;
         //find the upper bound, and go down the tree
@@ -348,7 +344,9 @@ public class Knapsack {
       }
     }
 
-    System.out.println("Using Branch and Bound the best feasible solution found: Value " + best.value + " Weight " + best.weight);
+    System.out.println("Using Branch and Bound "
+                        + "the best feasible solution found: Value "
+                        + best.value + " Weight " + best.weight);
     Collections.sort(best.items);
     for (int item : best.items) {
       System.out.print(item + " ");
@@ -357,40 +355,58 @@ public class Knapsack {
   }
 
   public static void main(String [] argv) throws FileNotFoundException {
+    //checks to see if the user gave us a file
     if (argv.length == 0) {
       System.out.println("Missing input file...");
     } else {
+      //if they did, start the process
       Scanner filescanner = new Scanner(new File(argv[0]));
-      //System.out.println(filescanner.nextLine().split(" ")[0]);
-      //int itemCount = Integer.parseInt(filescanner.nextLine().split(" ")[0]);
+      //get the item count
       int itemCount = Integer.parseInt(filescanner.next());
+      //clear the scanner's buffer
       filescanner.nextLine();
+      //initialize arrays to hold the values and weights of the file
       int [] values = new int [itemCount];
       int [] weights = new int [itemCount];
+      //for each item
       for (int i = 1; i <= itemCount; i++) {
+        //replace tabs with spaces, and split by spaces
         String [] line = filescanner.nextLine().replace("\t", " ").split(" ");
+        //counter to keep track of what value we are given (ie. a value)
         int counter = 0;
         for (String s : line) {
+          //since we may get spaces when we split, we'll act on when we get a
+          //number
           if (!s.equals("")) {
+            //if the counter is 0, we are given an item with that number
             if (counter == 0) {
+              //but we don't need the number, so increase the counter
               counter++;
+              //if the counter is 1, then we are given a value
             } else if (counter == 1) {
+              //so get that value, and increment the counter
               values[i - 1] = Integer.parseInt(s);
               counter++;
+              //otherwise, we are given a weight
             } else {
               weights[i - 1] = Integer.parseInt(s);
             }
           }
         }
       }
+      //get the capacity manually as it is the last part of the file
       int capacity = Integer.parseInt(filescanner.next());
+      //give a default time limit of 5 minutes
       int timelimit = 5;
+      //if there is a time limit given to us, use it
       if (argv.length > 1) {
         timelimit = Integer.parseInt(argv[1]);
       }
+      //use bruteforce if we do not have too many items
       if (itemCount <= 25) {
         bruteForce(capacity, itemCount, values, weights);
       }
+      //call the methods
       greedy(capacity, itemCount, values, weights);
       dynamic(capacity, itemCount, values, weights);
       branchAndBound(capacity, itemCount, values, weights, timelimit);
