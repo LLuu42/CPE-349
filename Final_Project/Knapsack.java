@@ -113,7 +113,7 @@ public class Knapsack {
                               int [] weights, int [] [] table) {
     int i = n;
     int j = capacity;
-    int value, weight = 0;
+    int value = 0, weight = 0;
     ArrayList<Integer> itemsTaken = new ArrayList<Integer>();
     //while there are still items to take and we aren't empty
     while (i > 0 && j >= 0) {
